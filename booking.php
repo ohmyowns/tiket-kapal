@@ -170,7 +170,7 @@ $harga_map = [
                                 <label class="form-label">No. Telepon</label>
                                 <input type="text" name="telepon" class="form-control"
                                        placeholder="08xxxxxxxxxx"
-                                       value="<?= htmlspecialchars($_POST['telepon'] ?? $_SESSION['email']) ?>" required>
+                                       value="<?= htmlspecialchars($_POST['telepon'] ?? $_SESSION['telepon']) ?>" required>
                             </div>
                         </div>
 
@@ -188,14 +188,15 @@ $harga_map = [
                                     'bisnis'  => ['💺', 'Bisnis',  'Kursi reclining, AC'],
                                     'vip'     => ['👑', 'VIP',    'Kabin privat, makan'],
                                 ];
+                                
                                 foreach ($kelas_info as $k => $info):
-                                    $sel = ($kelas_sel == $k) ? 'selected' : '';
+                                    $isActive = ($kelas_sel == $k) ? 'selected' : '';
                                 ?>
-                                    <label style="cursor:pointer;">
-                                        <input type="radio" name="kelas" value="<?= $k ?>"
-                                               <?= $kelas_sel == $k ? 'checked' : '' ?>
-                                               onchange="updateHarga()" style="display:none;">
-                                        <div class="harga-item <?= $sel ?>" onclick="selectKelas('<?= $k ?>')">
+                                    <label style="cursor:pointer; display: block;">
+                                        <input type="radio" name="kelas" value="<?= $k ?>" 
+                                            <?= $kelas_sel == $k ? 'checked' : '' ?> 
+                                            style="display:none;">
+                                        <div class="harga-item <?= $isActive ?>" onclick="selectKelas(this, '<?= $k ?>')">
                                             <div style="font-size:1.5rem;"><?= $info[0] ?></div>
                                             <div class="kelas"><?= $info[1] ?></div>
                                             <div class="harga"><?= formatRupiah($harga_map[$k]) ?></div>
@@ -286,35 +287,54 @@ $harga_map = [
 </div>
 
 <script>
+// Data harga dari PHP
 const hargaData = {
-    ekonomi: <?= $jadwal['harga_ekonomi'] ?>,
-    bisnis:  <?= $jadwal['harga_bisnis'] ?>,
-    vip:     <?= $jadwal['harga_vip'] ?>
+    ekonomi: <?= (int)$jadwal['harga_ekonomi'] ?>,
+    bisnis:  <?= (int)$jadwal['harga_bisnis'] ?>,
+    vip:     <?= (int)$jadwal['harga_vip'] ?>
 };
+
 
 let selectedKelas = '<?= $kelas_sel ?>';
 
-function selectKelas(kelas) {
-    selectedKelas = kelas;
-    document.querySelectorAll('input[name="kelas"]').forEach(r => {
-        r.checked = (r.value === kelas);
-    });
+function selectKelas(element, kelas) {
+    // 1. Update radio button yang tersembunyi
+    const radio = element.parentElement.querySelector('input[type="radio"]');
+    radio.checked = true;
+
+    // 2. Update visual (hapus class selected dari semua, tambah ke yang diklik)
     document.querySelectorAll('.harga-item').forEach(el => {
         el.classList.remove('selected');
     });
-    event.currentTarget.querySelector('.harga-item').classList.add('selected');
+    element.classList.add('selected');
+
+    // 3. Hitung ulang harga
     updateHarga();
 }
 
+
+
+// Fungsi hitung total harga
 function updateHarga() {
-    const jumlah = parseInt(document.querySelector('select[name="jumlah_tiket"]').value);
-    const harga  = hargaData[selectedKelas] || 0;
+    // Ambil nilai kelas yang sedang terpilih dari radio button
+    const radioTerpilih = document.querySelector('input[name="kelas"]:checked');
+    if (!radioTerpilih) return;
+
+    const kelas = radioTerpilih.value;
+    const jumlah = parseInt(document.querySelector('select[name="jumlah_tiket"]').value) || 1;
+    const harga  = hargaData[kelas] || 0;
     const total  = harga * jumlah;
 
+    // Update tampilan text
     document.getElementById('harga-per-tiket').textContent = 'Rp ' + harga.toLocaleString('id-ID');
     document.getElementById('total-harga').textContent     = 'Rp ' + total.toLocaleString('id-ID');
 }
+
+// Jalankan updateHarga saat halaman pertama kali dimuat agar angka sinkron
+document.addEventListener('DOMContentLoaded', updateHarga);
 </script>
+
+
 
 </body>
 </html>

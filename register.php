@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'] ?? '';
     $confirm  = $_POST['confirm_password'] ?? '';
 
-    if (empty($nama) || empty($email) || empty($password)) {
+    if (empty($nama) || empty($email) || empty($telepon) || empty($password)) {
         $error = 'Semua field wajib diisi!';
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $error = 'Format email tidak valid!';
@@ -25,6 +25,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Password minimal 6 karakter!';
     } elseif ($password !== $confirm) {
         $error = 'Konfirmasi password tidak cocok!';
+    // } elseif (strlen($telepon) !== 12) {
+    //     $error = 'Format telepon tidak valid!';
+    } elseif (!is_numeric($telepon)) {
+        $error = 'Telepon harus berupa angka!';
     } else {
         $db   = getDB();
         $stmt = $db->prepare("SELECT id FROM users WHERE email = ?");
@@ -99,9 +103,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 <div class="form-group">
                     <label class="form-label">No. Telepon</label>
-                    <input type="text" name="telepon" class="form-control"
+                    <input type="number" name="telepon" class="form-control"
                            placeholder="08xxxxxxxxxx"
-                           value="<?= htmlspecialchars($_POST['telepon'] ?? '') ?>">
+                           value="<?= htmlspecialchars($_POST['telepon'] ?? '') ?>" required>
                 </div>
 
                 <div class="form-group">
