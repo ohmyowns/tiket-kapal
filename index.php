@@ -261,7 +261,7 @@ $db->close();
 </div>
 
 <div class="footer">
-    <p>© 2024 <strong>NusantaraFerry</strong> — Sistem Pemesanan Tiket Kapal | Tugas QA Testing</p>
+    <p>© 2024 <strong>NusantaraFerry</strong> — Sistem Pemesanan Tiket Kapal</p>
 </div>
 
 </body>
